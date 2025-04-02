@@ -3,6 +3,10 @@ from requests_html import HTMLSession
 
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return jsonify({"message": "AI Persona News API Running!"})
+
 @app.route('/crawl-openai')
 def crawl_openai():
     session = HTMLSession()
