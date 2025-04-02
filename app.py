@@ -1,21 +1,25 @@
 from flask import Flask, jsonify
-import requests
-from bs4 import BeautifulSoup
+from requests_html import HTMLSession
 
 app = Flask(__name__)
 
 @app.route('/crawl-openai')
 def crawl_openai():
-    res = requests.get("https://openai.com/research")
-    soup = BeautifulSoup(res.text, 'html.parser')
+    session = HTMLSession()
+    url = "https://openai.com/research"
+    response = session.get(url)
+    response.html.render(sleep=3)
 
     articles = []
-    for post in soup.select('a[href^="/research/"]')[:30]:
-        title = post.get_text(strip=True)
-        link = 'https://openai.com' + post['href']
-        articles.append({'title': title, 'link': link})
+    for link in response.html.find('a[href^="/research/"]'):
+        title_element = link.find('span,h2,h3', first=True)
+        if title_element:
+            title = title_element.text
+            href = link.attrs['href']
+            articles.append({"title": title, "link": f"https://openai.com{href}"})
 
-    return jsonify(articles)
+    unique_articles = [dict(t) for t in {tuple(d.items()) for d in articles}]
+    return jsonify(unique_articles[:30])
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run()
