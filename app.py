@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
-# 경로 1: OpenAI Research 크롤링
 @app.route('/crawl-openai')
 def crawl_openai():
     res = requests.get("https://openai.com/research")
